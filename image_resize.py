@@ -1,66 +1,73 @@
-"""PIL.Image.open(fp, mode='r')
-Opens and identifies the given image file.
-This is a lazy operation; this function identifies the file, 
-but the file remains open and the actual image data is not read from the file until you try to process the data 
-(or call the load() method). See new().
-Parameters:	
-fp – A filename (string), pathlib.Path object or a file object. 
-The file object must implement read(), seek(), and tell() methods, and be opened in binary mode.
-mode – The mode. If given, this argument must be “r”.
-Returns:	
-An Image object.
-Raises:	
-IOError – If the file cannot be found, or the image cannot be opened and identified."""
-
+import os
+import argparse
 from PIL import Image
 
 
-"""Image.putdata(data, scale=1.0, offset=0.0)
-Copies pixel data to this image. 
-This method copies data from a sequence object into the image, 
-starting at the upper left corner (0, 0), and continuing until either the image or the sequence ends. 
-The scale and offset values are used to adjust the sequence values: pixel = value*scale + offset.
-Parameters:	
-data – A sequence object.
-scale – An optional scale value. The default is 1.0.
-offset – An optional offset value. The default is 0.0.
-Returns:	
-An Image object.
 
-Image.resize(size, resample=0)
-Returns a resized copy of this image.
-Parameters:	
-size – The requested size in pixels, as a 2-tuple: (width, height).
-resample – An optional resampling filter. This can be one of PIL.Image.NEAREST, PIL.Image.BOX, PIL.Image.BILINEAR, PIL.Image.HAMMING, PIL.Image.BICUBIC or PIL.Image.LANCZOS. If omitted, or if the image has mode “1” or “P”, it is set PIL.Image.NEAREST. See: Filters.
-Returns:	
-An Image object.
+def create_parser ():
+    parser = argparse.ArgumentParser()
+    parser.add_argument ('filepath')
+    parser.add_argument ('-w', '--width', nargs='?', type=int)
+    parser.add_argument ('-h', '--height', nargs='?', type=int)
+    parser.add_argument ('-s', '--scale', nargs='?', type=float)
+    parser.add_argument ('-o', '--output', nargs='?')
+    return parser
 
 
-Image.save(fp, format=None, **params)
-Saves this image under the given filename. 
-If no format is specified, the format to use is determined from the filename extension, if possible.
-Keyword options can be used to provide additional instructions to the writer. 
-If a writer doesn’t recognise an option, it is silently ignored. 
-The available options are described in the image format documentation for each writer.
-You can use a file object instead of a filename. 
-In this case, you must always specify the format. 
-The file object must implement the seek, tell, and write methods, and be opened in binary mode.
-Parameters:	
-fp – A filename (string), pathlib.Path object or file object.
-format – Optional format override. If omitted, the format to use is determined from the filename extension. If a file object was used instead of a filename, this parameter should always be used.
-options – Extra parameters to the image writer.
-Returns:	
-None
+def parse_filepath(namespace):
+    filepath_in = namespace.filepath
+    if namespace.output:
+        if os.path.exists(namespace.output):
+            filepath_out = namespace.filepath
+        else:
+            filepath_out = filepath_in
+    else:
+        filepath_out = filepath_in
+    return filepath_in, filepath_out
 
-Raises:	
-KeyError – If the output format could not be determined from the file name. Use the format option to solve this.
-IOError – If the file could not be written. The file may have been created, and may contain partial data.
-def resize_image(path_to_original, path_to_result):
-    pass"""
+
+def pic_scale(width, height, scale):
+    return int(width*scale), int(height*scale)
+
+
+def check_scale(width, height, new_width, new_height):
+    # TODO
+    print('Scale is broken. The picture is saved with changed proportions')
+
+def pic_resize(width, height, new_width=0, new_height=0):
+
+
+    return new_width, new_height
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
-    im = Image.open("./foto1.jpg")
-    print(im.format, im.size, im.mode)
-    im.show()
+    parser = create_parser()
+    namespace = parser.parse_args()
+
+    filepath_in, filepath_out = parse_filepath(namespace)
+    pic = Image.open(filepath_in)
+
+    print(pic.format, pic.size, pic.mode)
+
+    if namespace.scale:
+        new_width, new_height = pic_scale(pic.width, pic.height, namespace.scale)
+    elif namespace.width and namespace.height:
+        check_scale(pic.width, pic.height, namespace.width, namespace.height)
+        new_width, new_height = namespace.width, namespace.height
+    elif namespace.width:
+        new_width, new_height = pic_resize(pic.width, pic.height, namespace.width)
+    elif namespace.height:
+        new_width, new_height = pic_resize(pic.width, pic.height, namespace.height)
+    else:
+        print('You did not enter anything. The program did nothing')
+
+    new_im = pic.resize((new_width, new_height))
+    new_im.save(filepath_out, pic.format)
+
 
