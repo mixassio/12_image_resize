@@ -29,7 +29,6 @@ def parse_filepath(namespace):
 
 
 def pic_scale(width, height, scale):
-    print(width, height, scale)
     return int(width*scale), int(height*scale)
 
 
@@ -63,8 +62,6 @@ if __name__ == '__main__':
 
     filepath_in, filepath_out = parse_filepath(namespace)
     pic = Image.open(filepath_in)
-
-    print(pic.format, pic.size, pic.mode)
 
     if namespace.scale:
         new_width, new_height = pic_scale(pic.width, pic.height, namespace.scale)
