@@ -20,7 +20,7 @@ def parse_filepath(namespace):
     dir_name, file_name = os.path.split(filepath_in)
     if namespace.output:
         if os.path.exists(namespace.output):
-            filepath_out = os.path.abspath(namespace.output) + '/' + file_name
+            filepath_out = os.path.join(os.path.abspath(namespace.output), file_name)
         else:
             filepath_out = filepath_in
     else:
@@ -42,10 +42,9 @@ def check_scale(width, height, new_width, new_height):
 def pic_resize(width, height, new_width, new_height):
     if new_width == 0:
         scale = new_height / height
-        new_width, new_height = pic_scale(width, height, scale)
     elif new_height == 0:
         scale = new_width / width
-        new_width, new_height = pic_scale(width, height, scale)
+    new_width, new_height = pic_scale(width, height, scale)
     return new_width, new_height
 
 
@@ -53,7 +52,7 @@ def filepath_save(filepath, width, heigth, format):
     filepath = os.path.abspath(filepath)
     dir_name, file_name = os.path.split(filepath)
     name_file = re.findall('(\w*)\.', os.path.basename(file_name))
-    return dir_name + '/' + name_file[0] + '__' + str(width) + 'x' + str(heigth) +'.' + format
+    return '{}/{}__{}x{}.{}'.format(dir_name, name_file[0], str(width), str(heigth), format)
 
 
 if __name__ == '__main__':
